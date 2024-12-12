@@ -1,0 +1,59 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidSession() {
+      let session = request.resource.data;
+      return 
+        // Required fields
+        session.keys().hasAll(['userId', 'sessionType', 'sessionName', 'durationSeconds', 'startedAt', 'completedAt', 'status']) &&
+        // Field type validation
+        session.userId is string &&
+        session.sessionType in ['work', 'break'] &&
+        session.sessionName is string &&
+        session.durationSeconds is number &&
+        session.startedAt is string &&
+        session.completedAt is string &&
+        session.status in ['completed', 'paused', 'cancelled'] &&
+        // Business logic validation
+        session.durationSeconds > 0 &&
+        session.durationSeconds <= 7200 && // Max 2 hours
+        session.userId == request.auth.uid;
+    }
+
+    // Sessions collection rules
+    match /sessions/{sessionId} {
+      // Allow read if user owns the session
+      allow read: if isOwner(resource.data.userId);
+      
+      // Allow create if user is authenticated and data is valid
+      allow create: if isAuthenticated() && isValidSession();
+      
+      // Allow update if user owns the session and data is valid
+      allow update: if isOwner(resource.data.userId) && isValidSession();
+      
+      // Allow delete if user owns the session
+      allow delete: if isOwner(resource.data.userId);
+    }
+
+    // User profiles collection (if you add it in the future)
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
+    }
+
+    // Deny access to all other collections by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
