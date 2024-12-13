@@ -36,7 +36,7 @@ const CalendarDay: React.FC<CalendarDayProps> = ({ date, stats, onClick, isLoadi
         {isLoading ? (
           <div className="w-full h-1 bg-gray-200 animate-pulse rounded mt-1" />
         ) : hasActivity ? (
-          <div className="flex-1 flex flex-col justify-end">
+          <div className="flex-1 sm:flex flex-col justify-end hidden">          
             <div className="flex items-center justify-center space-x-1 text-xs md:text-sm text-gray-600">
               <Timer className="w-3 h-3 md:w-4 md:h-4" />
               <span>{stats.totalHours.toFixed(1)}h</span>
