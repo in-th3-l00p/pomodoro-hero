@@ -19,7 +19,7 @@ export default function App() {
     <Router>
       <AuthProvider>
         <ToastProvider>
-          <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+          <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
             <Navbar />
             <Routes>
               <Route path="/" element={<LandingPage />} />
@@ -67,7 +67,7 @@ export default function App() {
               />
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </div>
+          </main>
         </ToastProvider>
       </AuthProvider>
     </Router>
